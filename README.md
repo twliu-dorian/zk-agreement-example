@@ -8,6 +8,7 @@ A command-line tool built using the Accord Project template to parse and execute
 - [Objective and Scope](#objective-and-scope)
 - [Technical Requirements](#technical-requirements)
 - [Project Components](#project-components)
+  - [Ransomed File Setup](#ransomed-file-setup)
   - [Contract Template Creation](#contract-template-creation)
   - [Data Modeling with Concerto](#data-modeling-with-concerto)
   - [Contract Logic with Ergo](#contract-logic-with-ergo)
@@ -35,11 +36,46 @@ This project provides a command-line tool for processing ransomware recovery con
   - **Accord Project Concerto** for data modeling
   - **Ergo** for contract logic implementation
   - **Commander.js** for CLI implementation
+  - **crypto** for file hashing and commitment generation
 - **Input/Output**:
-  - **Input**: Text-based ransomware recovery service contract
+  - **Input**: Text-based ransomware recovery service contract and ransomed file
   - **Output**: Computed contract outcomes in JSON format
 
 ## Project Components
+
+### Ransomed File Setup
+
+- **Objective**: Simulate a scenario where a file has been ransomed and the attacker has left a commitment to the ransomed file
+- **Components**:
+  - Create a sample file that will be "ransomed"
+  - Generate a cryptographic commitment representing the ransomed file (e.g., using a hash function)
+  - Store the commitment as part of the contract details to demonstrate a realistic ransomware scenario
+- **Implementation**:
+
+  ```bash
+  # Create sample ransomed file
+  echo "Important company data - encrypted by ransomware" > ransom-note.txt
+
+  # Generate commitment using Node.js
+  node -e "
+    const crypto = require('crypto');
+    const fs = require('fs');
+    const content = fs.readFileSync('ransom-note.txt');
+    const hash = crypto.createHash('sha256').update(content).digest('hex');
+    fs.writeFileSync('commitment.txt', hash);
+    console.log('File commitment:', hash);
+  "
+  ```
+
+- **CLI Integration**:
+
+  ```bash
+  # Command to generate file commitment
+  recover-cli generate-commitment --file ransom-note.txt --output commitment.txt
+
+  # Command to verify file against commitment
+  recover-cli verify-commitment --file ransom-note.txt --commitment commitment.txt
+  ```
 
 ### Contract Template Creation
 
@@ -68,6 +104,15 @@ asset Contract identified by contractId {
   o String fileCommitment
   o String recoveryPlan
 }
+
+transaction RecoveryRequest {
+  o String fileHash
+}
+
+transaction RecoveryResponse {
+  o String status
+  o String recoveryPlan
+}
 ```
 
 ### Contract Logic with Ergo
@@ -94,6 +139,9 @@ The CLI tool provides the following commands:
 # Initialize a new contract
 recover-cli init --template /path/to/template.tem --output contract.json
 
+# Generate file commitment
+recover-cli generate-commitment --file ransom-note.txt --output commitment.txt
+
 # Execute a contract clause
 recover-cli execute --contract contract.json --clause recover --input request.json
 
@@ -107,10 +155,11 @@ recover-cli validate --contract contract.json
 
    ```bash
    npm init
-   npm install @accordproject/cicero-core @accordproject/cicero-cli commander
+   npm install @accordproject/cicero-core @accordproject/cicero-cli commander crypto
    ```
 
 2. **Implementation Order**:
+   - Implement file commitment generation utilities
    - Create contract template and model
    - Implement Ergo logic
    - Develop CLI interface
@@ -119,13 +168,18 @@ recover-cli validate --contract contract.json
 
 ## Testing and Validation
 
-- **Unit Tests**: Test individual components (template parsing, logic execution)
+- **Unit Tests**:
+  - Test file commitment generation and verification
+  - Test template parsing and logic execution
 - **Integration Tests**: Test complete contract execution flow
 - **Validation Tests**: Verify contract compliance and error handling
 
 ## Usage Guide
 
 ```bash
+# Generate commitment for ransomed file
+recover-cli generate-commitment --file ransom-note.txt --output commitment.txt
+
 # Create a new contract from template
 recover-cli init --template ransomware-template.tem --params params.json --output contract.json
 
@@ -143,6 +197,8 @@ ransomware-recovery-service/
 ├── bin/
 │   └── recover-cli.js
 ├── src/
+│   ├── utils/
+│   │   └── commitment.js
 │   ├── templates/
 │   │   └── ransomware-template.tem
 │   ├── models/
@@ -150,6 +206,7 @@ ransomware-recovery-service/
 │   └── logic/
 │       └── logic.ergo
 ├── test/
+│   ├── commitment.test.js
 │   ├── contract.test.js
 │   └── cli.test.js
 ├── package.json
