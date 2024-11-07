@@ -149,9 +149,11 @@ recover-cli execute --contract contract.json --clause recover --input request.js
 recover-cli validate --contract contract.json
 ```
 
+#[Previous sections remain the same until Development Steps...]
+
 ## Development Steps
 
-1. **Project Setup**
+1. **Project Setup** (November 7-8)
 
    ```bash
    npm init
@@ -159,12 +161,42 @@ recover-cli validate --contract contract.json
    ```
 
 2. **Implementation Order**:
-   - Implement file commitment generation utilities
-   - Create contract template and model
-   - Implement Ergo logic
-   - Develop CLI interface
-   - Add validation and error handling
-   - Create test suite
+   - Implement file commitment generation utilities (November 8-9)
+   - Create contract template and model (November 9-10)
+   - Implement Ergo logic (November 10-12)
+   - Develop CLI interface (November 12-13)
+   - Add validation and error handling (November 13-14)
+   - Create test suite (November 14-15)
+   - Final testing and documentation (November 15-16)
+
+## Project Timeline
+
+### Week 1 (November 7-10)
+
+- Project setup and environment configuration
+- Implementation of core file commitment functionality
+- Development of contract templates and data models
+- Initial Ergo logic implementation
+
+### Week 2 (November 11-16)
+
+- Complete Ergo logic implementation
+- CLI interface development
+- Testing and validation
+- Documentation and final review
+
+**Final Deadline: November 16, 2024**
+
+- All features must be implemented and tested
+- Documentation must be complete
+- Code must be ready for production use
+
+### Deliverables
+
+1. Functional command-line tool
+2. Complete test suite
+3. CLI documentation
+4. Sample contracts and test files
 
 ## Testing and Validation
 
