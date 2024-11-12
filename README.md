@@ -96,13 +96,6 @@ To be implemented:
        -> [COMPLETE]           : When payment processed
 ```
 
-### 4. Additional Features Needed
-1. Error handling for invalid states
-2. Payment verification mechanism
-3. State history tracking
-4. Contract validation checks
-5. Test suite for all commands
-
 ## Project Structure
 ```
 /opt/Capstone/
