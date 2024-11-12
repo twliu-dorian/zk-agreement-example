@@ -1,0 +1,23 @@
+{
+    "name": "ransomware-recovery-template",
+    "displayName": "Ransomware Recovery Agreement",
+    "version": "0.1.0",
+    "description": "A template for ransomware recovery agreements using the Accord Project.",
+    "author": "Accord Project",
+    "license": "Apache-2.0",
+    "accordproject": {
+        "template": "contract",
+        "cicero": "0.22.0"
+    },
+    "devDependencies": {
+        "cucumber": "5.1.0"
+    },
+    "dependencies": {
+        "@accordproject/cicero-core": "0.22.0",
+        "@accordproject/cicero-engine": "0.22.0",
+        "@accordproject/ergo-compiler": "0.22.0"
+    },
+    "scripts": {
+        "test": "cucumber-js test -r .cucumber.js"
+    }
+}

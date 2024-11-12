@@ -1,0 +1,26 @@
+{
+  "data": {
+    "$class": "org.accordproject.ransomware.recovery.RansomwareContract",
+    "contractId": "66f8eee31d8faeeab56e3d04aef8ffc2",
+    "buyer": {
+      "$class": "org.accordproject.ransomware.recovery.ContractParty",
+      "partyId": "1234",
+      "name": "Victim 1234"
+    },
+    "seller": {
+      "$class": "org.accordproject.ransomware.recovery.ContractParty",
+      "partyId": "5678",
+      "name": "Attacker 5678"
+    },
+    "paymentAmount": {
+      "$class": "org.accordproject.money.MonetaryAmount",
+      "doubleValue": 1,
+      "currencyCode": "ETH"
+    },
+    "fileCommitment": "c5cb769909fb4aae0eec3b46574c14e0a0ef58adae5a3ea966ca81fda52aa214"
+  },
+  "state": {
+    "$class": "org.accordproject.ransomware.recovery.RansomwareContractState",
+    "status": "CREATED"
+  }
+}

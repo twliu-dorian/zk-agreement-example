@@ -1,0 +1,43 @@
+namespace org.accordproject.ransomware.recovery
+
+import org.accordproject.obligation.*
+import org.accordproject.runtime.*
+
+contract RansomwareRecovery over RansomwareContract state RansomwareContractState {
+  
+  clause initialize(request: Request) : Response {
+    set state RansomwareContractState{
+      status: CREATED
+    };
+    return Response{}
+  }
+  
+  clause decrypt(request : DecryptionRequest) : DecryptionResponse {
+    // Verify the decryption key matches the commitment
+    let verificationSuccess = request.decryptionKey = contract.fileCommitment;
+    
+    if verificationSuccess then
+      let payment = PaymentObligation{
+        contract: contract,
+        promisor: some(contract.buyer),
+        promisee: some(contract.seller),
+        deadline: none,
+        amount: contract.paymentAmount,
+        description: contract.buyer.name ++ " should pay ransom amount to " ++ contract.seller.name
+      };
+      let state1 = RansomwareContractState{
+        status: AWAITING_EVALUATION
+      };
+      emit payment;
+      set state state1;
+      return DecryptionResponse{
+        success: true,
+        message: "Decryption key verified successfully"
+      }
+    else 
+      return DecryptionResponse{
+        success: false,
+        message: "Invalid decryption key"
+      }
+  }
+}

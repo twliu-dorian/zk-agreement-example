@@ -1,0 +1,6 @@
+{
+  "victimId": "1234",
+  "fileId": "905a0001377f2db355dea08324f6ad009de5447cc24c64efe59e64d85a4ad390",
+  "encryptedFile": "./files/secret.pem.encrypted",
+  "commitment": "c5cb769909fb4aae0eec3b46574c14e0a0ef58adae5a3ea966ca81fda52aa214"
+}

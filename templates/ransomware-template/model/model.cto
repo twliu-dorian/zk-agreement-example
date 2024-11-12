@@ -1,0 +1,56 @@
+namespace org.accordproject.ransomware.recovery
+
+import org.accordproject.contract.* from https://models.accordproject.org/accordproject/contract.cto
+import org.accordproject.runtime.* from https://models.accordproject.org/accordproject/runtime.cto
+import org.accordproject.obligation.* from https://models.accordproject.org/accordproject/obligation.cto
+import org.accordproject.money.MonetaryAmount from https://models.accordproject.org/money@0.2.0.cto
+
+/**
+ * Defines a party in the contract
+ */
+participant ContractParty identified by partyId {
+  o String partyId
+  o String name
+}
+
+/**
+ * The template model
+ */
+asset RansomwareContract extends Contract {
+  --> ContractParty buyer
+  --> ContractParty seller
+  o MonetaryAmount paymentAmount
+  o String fileCommitment
+}
+
+/**
+ * Status enum
+ */
+enum RecoveryStatus {
+  o CREATED
+  o AWAITING_EVALUATION
+  o FINISH_EVALUATION
+  o COMPLETE
+}
+
+/**
+ * The contract state
+ */
+asset RansomwareContractState extends State {
+  o RecoveryStatus status
+}
+
+/**
+ * The request
+ */
+transaction DecryptionRequest extends Request {
+  o String decryptionKey
+}
+
+/**
+ * The response
+ */
+transaction DecryptionResponse extends Response {
+  o Boolean success
+  o String message
+}
