@@ -1,7 +1,7 @@
 {
-  "data": {
+  "contract": {
     "$class": "org.accordproject.ransomware.recovery.RansomwareContract",
-    "contractId": "66f8eee31d8faeeab56e3d04aef8ffc2",
+    "contractId": "40862f365abf106d3b24b238d9b0c23e",
     "buyer": {
       "$class": "org.accordproject.ransomware.recovery.ContractParty",
       "partyId": "1234",
@@ -15,12 +15,16 @@
     "paymentAmount": {
       "$class": "org.accordproject.money.MonetaryAmount",
       "doubleValue": 1,
-      "currencyCode": "ETH"
+      "currencyCode": "USD"
     },
-    "fileCommitment": "c5cb769909fb4aae0eec3b46574c14e0a0ef58adae5a3ea966ca81fda52aa214"
+    "fileCommitment": "c5cb769909fb4aae0eec3b46574c14e0a0ef58adae5a3ea966ca81fda52aa214",
+    "status": "AWAITING_EVALUATION",
+    "submittedKey": "c5cb769909fb4aae0eec3b46574c14e0a0ef58adae5a3ea966ca81fda52aa214"
   },
   "state": {
     "$class": "org.accordproject.ransomware.recovery.RansomwareContractState",
-    "status": "CREATED"
+    "status": "COMPLETE",
+    "message": "Key verified successfully",
+    "$identifier": "22b43764-4e51-46b1-b301-8a295e27e011"
   }
 }

@@ -5,39 +5,73 @@ import org.accordproject.runtime.*
 
 contract RansomwareRecovery over RansomwareContract state RansomwareContractState {
   
-  clause initialize(request: Request) : Response {
+  // Initialize the contract
+  clause initialize(request : Request) : Response {
     set state RansomwareContractState{
-      status: CREATED
+      status: INIT,
+      message: none
     };
     return Response{}
   }
-  
-  clause decrypt(request : DecryptionRequest) : DecryptionResponse {
-    // Verify the decryption key matches the commitment
-    let verificationSuccess = request.decryptionKey = contract.fileCommitment;
-    
-    if verificationSuccess then
-      let payment = PaymentObligation{
-        contract: contract,
-        promisor: some(contract.buyer),
-        promisee: some(contract.seller),
-        deadline: none,
-        amount: contract.paymentAmount,
-        description: contract.buyer.name ++ " should pay ransom amount to " ++ contract.seller.name
+
+  // Submit key for validation
+  clause submitKey(request : KeySubmissionRequest) : KeySubmissionResponse {
+    if state.status = INIT
+    then
+      let newState = RansomwareContractState{
+        status: AWAITING_EVALUATION,
+        message: some("Key submitted, awaiting validation")
       };
-      let state1 = RansomwareContractState{
-        status: AWAITING_EVALUATION
-      };
-      emit payment;
-      set state state1;
-      return DecryptionResponse{
+      set state newState;
+      return KeySubmissionResponse{
         success: true,
-        message: "Decryption key verified successfully"
+        message: "Key submitted successfully"
       }
     else 
-      return DecryptionResponse{
+      return KeySubmissionResponse{
         success: false,
-        message: "Invalid decryption key"
+        message: "Invalid contract state for key submission"
       }
+  }
+
+  // Validate submitted key
+  clause validate(request : ValidationRequest) : ValidationResponse {
+    if state.status != AWAITING_EVALUATION
+    then return ValidationResponse{
+      success: false,
+      message: "Contract not in validation state"
+    }
+    else
+      let keyMatches = request.submittedKey = contract.fileCommitment;
+      if keyMatches
+      then
+        let payment = PaymentObligation{
+          contract: contract,
+          promisor: none,
+          promisee: none,
+          deadline: none,
+          amount: contract.paymentAmount,
+          description: contract.buyer.name ++ " should pay ransom amount to " ++ contract.seller.name
+        };
+        let newState = RansomwareContractState{
+          status: COMPLETE,
+          message: some("Key verified successfully")
+        };
+        emit payment;
+        set state newState;
+        return ValidationResponse{
+          success: true,
+          message: "Key validation successful"
+        }
+      else
+        let newState = RansomwareContractState{
+          status: FINISH_EVALUATION,
+          message: some("Key verification failed")
+        };
+        set state newState;
+        return ValidationResponse{
+          success: false,
+          message: "Invalid key provided"
+        }
   }
 }
