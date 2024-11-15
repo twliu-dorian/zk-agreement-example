@@ -170,78 +170,84 @@ program
 
 // Initialize contract command
 program
-    .command('init')
-    .description('Initialize a new contract from template')
-    .requiredOption('--template <path>', 'Path to template directory')
-    .requiredOption('--commitment <path>', 'Path to commitment file')
-    .requiredOption('--victim <id>', 'Victim ID')
-    .requiredOption('--attacker <id>', 'Attacker ID')
-    .requiredOption('--output <path>', 'Output contract JSON path')
-    .action(async (options) => {
-        try {
-            console.log('Reading commitment from:', options.commitment);
-            const commitment = await fs.readFile(options.commitment, 'utf8');
+.command('init')
+.description('Initialize a new contract from template')
+.requiredOption('--template <path>', 'Path to template directory')
+.requiredOption('--commitment <path>', 'Path to commitment file')
+.requiredOption('--victim <id>', 'Victim ID')
+.requiredOption('--attacker <id>', 'Attacker ID')
+.requiredOption('--output <path>', 'Output contract JSON path')
+.action(async (options) => {
+    try {
+        console.log('Reading commitment from:', options.commitment);
+        const commitment = await fs.readFile(options.commitment, 'utf8');
 
-            console.log('Loading template from:', options.template);
-            const template = await Template.fromDirectory(options.template);
-            
-            console.log('Template loaded successfully');
+        console.log('Loading template from:', options.template);
+        const template = await Template.fromDirectory(options.template);
+        
+        console.log('Template loaded successfully');
 
-            // Generate contract ID
-            const contractId = crypto.randomBytes(16).toString('hex');
+        // Generate contract ID
+        const contractId = crypto.randomBytes(16).toString('hex');
 
-            // Create contract data
-            const data = {
-                '$class': 'org.accordproject.ransomware.recovery.RansomwareContract',
-                'contractId': contractId,
-                'buyer': {
-                    '$class': 'org.accordproject.ransomware.recovery.ContractParty',
-                    'partyId': options.victim,
-                    'name': `Victim ${options.victim}`
-                },
-                'seller': {
-                    '$class': 'org.accordproject.ransomware.recovery.ContractParty',
-                    'partyId': options.attacker,
-                    'name': `Attacker ${options.attacker}`
-                },
-                'paymentAmount': {
-                    '$class': 'org.accordproject.money.MonetaryAmount',
-                    'doubleValue': 1.0,
-                    'currencyCode': 'USD'  // Using USD as currency code
-                },
-                'fileCommitment': commitment.trim(),
-                'status': 'INIT'
-            };
+        // Create contract data with proper cryptocurrency support
+        const data = {
+            '$class': 'org.accordproject.ransomware.recovery.RansomwareContract',
+            'contractId': contractId,
+            'buyer': {
+                '$class': 'org.accordproject.ransomware.recovery.ContractParty',
+                'partyId': options.victim,
+                'name': `Victim ${options.victim}`
+            },
+            'seller': {
+                '$class': 'org.accordproject.ransomware.recovery.ContractParty',
+                'partyId': options.attacker,
+                'name': `Attacker ${options.attacker}`
+            },
+            'paymentAmount': {
+                '$class': 'org.accordproject.money.DigitalMonetaryAmount',
+                'doubleValue': 1.0,
+                'digitalCurrencyCode': 'ETH'
+            },
+            'fileCommitment': commitment.trim(),
+            'status': 'INIT'
+        };
 
-            // Create contract JSON
-            const contractJson = {
-                contract: data,
-                state: {
-                    '$class': 'org.accordproject.ransomware.recovery.RansomwareContractState',
-                    'status': 'INIT',
-                    'message': 'Contract initialized'
-                }
-            };
-
-            // Write to file
-            await fs.writeFile(
-                options.output,
-                JSON.stringify(contractJson, null, 2)
-            );
-
-            console.log('Contract initialization complete:');
-            console.log('- Contract created with ID:', contractId);
-            console.log('- Contract created for victim:', options.victim);
-            console.log('- Saved to:', options.output);
-
-        } catch (error) {
-            console.error('Error initializing contract:', error.message);
-            if (error.stack) {
-                console.error('Stack trace:', error.stack);
+        // Create contract JSON
+        const contractJson = {
+            contract: data,
+            state: {
+                '$class': 'org.accordproject.ransomware.recovery.RansomwareContractState',
+                'status': 'INIT',
+                'message': 'Contract initialized'
             }
-            process.exit(1);
+        };
+
+        // Write to file
+        await fs.writeFile(
+            options.output,
+            JSON.stringify(contractJson, null, 2)
+        );
+
+        console.log('Contract initialization complete:');
+        console.log('- Contract created with ID:', contractId);
+        console.log('- Contract created for victim:', options.victim);
+        console.log('- Saved to:', options.output);
+        
+        // Print contract state
+        console.log('\nCurrent Contract State:');
+        console.log('====================================');
+        console.log(JSON.stringify(contractJson, null, 2));
+        console.log('====================================');
+
+    } catch (error) {
+        console.error('Error initializing contract:', error.message);
+        if (error.stack) {
+            console.error('Stack trace:', error.stack);
         }
-    });
+        process.exit(1);
+    }
+});
 
 // Submit key command
 program
@@ -257,7 +263,7 @@ program
 
             // Generate hash of the provided key
             const keyHash = crypto.createHash('sha256')
-                .update(Buffer.from(options.key, 'hex'))  // Convert hex string to buffer
+                .update(Buffer.from(options.key, 'hex'))
                 .digest('hex');
             
             console.log('Generated hash for provided key:', keyHash);
@@ -265,27 +271,23 @@ program
             const template = await Template.fromDirectory('./templates/ransomware-template');
             console.log('Template loaded successfully');
 
-            // Create request data with proper class names
+            // Create request data
             const request = {
                 '$class': 'org.accordproject.ransomware.recovery.KeySubmissionRequest',
                 'key': keyHash
             };
 
-            // Create contract data with proper class structure
+            // Preserve existing contract data and add master key
             const contractData = {
-                '$class': 'org.accordproject.ransomware.recovery.RansomwareContract',
                 ...contractJson.contract,
-                'paymentAmount': {
-                    '$class': 'org.accordproject.money.MonetaryAmount',
-                    'doubleValue': contractJson.contract.paymentAmount.doubleValue,
-                    'currencyCode': contractJson.contract.paymentAmount.currencyCode
-                }
+                'status': contractJson.state.status, // Use existing state
+                'masterKey': options.key,  // Store the actual master key
             };
 
-            // Create state data with proper class structure
+            // Use the existing state from the contract
             const stateData = {
                 '$class': 'org.accordproject.ransomware.recovery.RansomwareContractState',
-                'status': contractJson.state.status,
+                'status': contractJson.state.status, // Important: Keep original state for the engine
                 'message': contractJson.state.message
             };
 
@@ -293,29 +295,66 @@ program
             await clause.setData(contractData);
 
             const engine = new Engine();
-            const result = await engine.trigger(clause, request, stateData);
+            let result;
+            
+            try {
+                result = await engine.trigger(clause, request, stateData);
+            } catch (error) {
+                console.warn('Engine trigger warning:', error.message);
+                result = {
+                    response: {
+                        success: false,
+                        message: error.message
+                    }
+                };
+            }
 
-            // Update contract with new state and submitted key
-            const updatedContract = {
-                contract: {
-                    ...contractData,
-                    submittedKey: keyHash,
-                    status: 'AWAITING_EVALUATION'
-                },
-                state: {
-                    '$class': 'org.accordproject.ransomware.recovery.RansomwareContractState',
-                    status: 'AWAITING_EVALUATION',
-                    message: 'Key submitted, awaiting validation'
-                }
-            };
+            if (result.response.success) {
+                // Only update state if the trigger was successful
+                const updatedContract = {
+                    contract: {
+                        ...contractData,
+                        masterKey: options.key,     // Store the original key
+                        submittedKey: keyHash,      // Store the hash
+                        status: 'AWAITING_EVALUATION'
+                    },
+                    state: {
+                        '$class': 'org.accordproject.ransomware.recovery.RansomwareContractState',
+                        status: 'AWAITING_EVALUATION',
+                        message: 'Key submitted, awaiting validation'
+                    }
+                };
+                await fs.writeFile(options.output, JSON.stringify(updatedContract, null, 2));
+                // Log the results
+                console.log('\nKey submission result:');
+                console.log('- Master Key:', options.key);
+                console.log('- Hash Generated:', keyHash);
+                console.log('- Success:', result.response.success);
+                console.log('- Message:', result.response.message);
+                console.log('- State:', updatedContract.state.status);
 
-            await fs.writeFile(options.output, JSON.stringify(updatedContract, null, 2));
+                // Print contract state
+                console.log('\nCurrent Contract State:');
+                console.log('====================================');
+                console.log(JSON.stringify(updatedContract, null, 2));
+                console.log('====================================');
+            } else {
+                // Keep original state on failure
+                await fs.writeFile(options.output, JSON.stringify(contractJson, null, 2));
+                // Log the results
+                console.log('\nKey submission result:');
+                console.log('- Master Key:', options.key);
+                console.log('- Hash Generated:', keyHash);
+                console.log('- Success:', result.response.success);
+                console.log('- Message:', result.response.message);
+                console.log('- State:', contractJson.state.status);
 
-            console.log('\nKey submission result:');
-            console.log('- Hash Generated:', keyHash);
-            console.log('- Success:', result.response.success);
-            console.log('- Message:', result.response.message);
-            console.log('- New State:', updatedContract.state.status);
+                // Print contract state
+                console.log('\nCurrent Contract State:');
+                console.log('====================================');
+                console.log(JSON.stringify(contractJson, null, 2));
+                console.log('====================================');
+            }
 
             return result;
         } catch (error) {
@@ -369,6 +408,12 @@ program
                 console.log('- Payment obligation has been emitted');
             }
 
+            // Print contract state
+            console.log('\nCurrent Contract State:');
+            console.log('====================================');
+            console.log(JSON.stringify(updatedContract, null, 2));
+            console.log('====================================');
+
             return result;
         } catch (error) {
             console.error('Error during validation:', error.message);
@@ -382,51 +427,105 @@ program
 // Decrypt command
 program
     .command('decrypt')
-    .description('Decrypt a file using the provided key')
-    .requiredOption('--file <path>', 'Path to encrypted file')
-    .requiredOption('--key <string>', 'Decryption key')
+    .description('Decrypt a file using the master key from contract')
+    .requiredOption('--contract <path>', 'Path to contract JSON file')
     .requiredOption('--victim <id>', 'Victim ID')
     .requiredOption('--output <path>', 'Output path for decrypted file')
     .action(async (options) => {
         try {
+            // Load and validate contract
+            console.log('Loading contract from:', options.contract);
+            const contractJson = JSON.parse(await fs.readFile(options.contract, 'utf8'));
+
+            // Check contract state
+            if (contractJson.state.status !== 'COMPLETE') {
+                console.error('Contract must be in COMPLETE state to decrypt');
+                console.error('Current state:', contractJson.state.status);
+                process.exit(1);
+            }
+
+            // Check for master key
+            if (!contractJson.contract.masterKey) {
+                console.error('No master key found in contract');
+                process.exit(1);
+            }
+
+            console.log('Contract Info:');
+            console.log('- State:', contractJson.state.status);
+            console.log('- Master Key:', contractJson.contract.masterKey);
+
+            // Load encryption data
+            const encryptionDataFile = `encryption_data_${options.victim}.json`;
+            const encryptionData = JSON.parse(await fs.readFile(encryptionDataFile, 'utf8'));
+
             // Read encrypted file
-            const encryptedData = await fs.readFile(options.file);
-            
+            const encryptedData = await fs.readFile(encryptionData.encryptedFile);
+            console.log('\nEncrypted File Info:');
+            console.log('- Total size:', encryptedData.length, 'bytes');
+
             // Extract IV, auth tag, and encrypted content
             const iv = encryptedData.slice(0, 16);
             const authTag = encryptedData.slice(16, 32);
             const encryptedContent = encryptedData.slice(32);
-            
-            // Generate file-specific decryption key
-            const fileId = crypto.createHash('sha256')
-                .update(options.file)
-                .digest('hex');
-            
+
+            console.log('- IV size:', iv.length, 'bytes');
+            console.log('- Auth Tag size:', authTag.length, 'bytes');
+            console.log('- Encrypted content size:', encryptedContent.length, 'bytes');
+
+            // Get file ID from encryption data
+            const fileId = encryptionData.fileId;
+            console.log('\nFile ID from encryption data:', fileId);
+
+            // Generate decryption key using master key from contract
+            const masterKeyBuffer = Buffer.from(contractJson.contract.masterKey, 'hex');
+            console.log('Master Key Buffer length:', masterKeyBuffer.length);
+
             const decryptionKey = crypto.createHash('sha256')
                 .update(Buffer.concat([
-                    Buffer.from(options.key, 'hex'),
+                    masterKeyBuffer,
                     Buffer.from(options.victim),
                     Buffer.from(fileId)
                 ]))
                 .digest();
-            
+
+            console.log('Decryption Key length:', decryptionKey.length);
+
             // Create decipher
             const decipher = crypto.createDecipheriv('aes-256-gcm', decryptionKey, iv);
             decipher.setAuthTag(authTag);
-            
+
             // Decrypt the data
-            let decrypted = decipher.update(encryptedContent);
-            decrypted = Buffer.concat([decrypted, decipher.final()]);
-            
+            let decrypted;
+            try {
+                console.log('\nAttempting decryption...');
+                decrypted = decipher.update(encryptedContent);
+                decrypted = Buffer.concat([decrypted, decipher.final()]);
+                console.log('Decryption successful!');
+                console.log('Decrypted size:', decrypted.length, 'bytes');
+            } catch (error) {
+                console.error('\nDecryption failed with error:', error.message);
+                console.error('This usually means either:');
+                console.error('1. The master key is incorrect');
+                console.error('2. The file has been corrupted');
+                console.error('3. The IV or auth tag are incorrect');
+                process.exit(1);
+            }
+
             // Write decrypted file
             await fs.writeFile(options.output, decrypted);
-            
-            console.log('File decryption complete:');
+
+            console.log('\nFile decryption complete:');
+            console.log('- Input file:', encryptionData.encryptedFile);
             console.log('- Decrypted file saved to:', options.output);
-            
+            console.log('- Contract state:', contractJson.state.status);
+            console.log('====================================');
+
             return true;
         } catch (error) {
             console.error('Error during file decryption:', error.message);
+            if (error.stack) {
+                console.error('Stack trace:', error.stack);
+            }
             process.exit(1);
         }
     });

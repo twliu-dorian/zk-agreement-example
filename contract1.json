@@ -18,11 +18,13 @@
       "digitalCurrencyCode": "ETH"
     },
     "fileCommitment": "d5ec9f98658bc838c79d38ce2870d7df93cadf73394bdabcec909c407e6a2c83",
-    "status": "INIT"
+    "status": "AWAITING_EVALUATION",
+    "masterKey": "3ab7d2c11b7be18ed813a474a8da4e2ec945c02be61dc6368fa2259926b4b25a",
+    "submittedKey": "d5ec9f98658bc838c79d38ce2870d7df93cadf73394bdabcec909c407e6a2c83"
   },
   "state": {
     "$class": "org.accordproject.ransomware.recovery.RansomwareContractState",
-    "status": "INIT",
-    "message": "Contract initialized"
+    "status": "AWAITING_EVALUATION",
+    "message": "Key submitted, awaiting validation"
   }
 }

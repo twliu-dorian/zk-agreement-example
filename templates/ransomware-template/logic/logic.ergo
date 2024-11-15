@@ -2,6 +2,7 @@ namespace org.accordproject.ransomware.recovery
 
 import org.accordproject.obligation.*
 import org.accordproject.runtime.*
+import org.accordproject.money.DigitalMonetaryAmount
 
 contract RansomwareRecovery over RansomwareContract state RansomwareContractState {
   
@@ -45,7 +46,7 @@ contract RansomwareRecovery over RansomwareContract state RansomwareContractStat
       let keyMatches = request.submittedKey = contract.fileCommitment;
       if keyMatches
       then
-        let payment = PaymentObligation{
+        let obligation = DigitalPaymentObligation{
           contract: contract,
           promisor: none,
           promisee: none,
@@ -53,11 +54,12 @@ contract RansomwareRecovery over RansomwareContract state RansomwareContractStat
           amount: contract.paymentAmount,
           description: contract.buyer.name ++ " should pay ransom amount to " ++ contract.seller.name
         };
+
         let newState = RansomwareContractState{
           status: COMPLETE,
           message: some("Key verified successfully")
         };
-        emit payment;
+        emit obligation;
         set state newState;
         return ValidationResponse{
           success: true,

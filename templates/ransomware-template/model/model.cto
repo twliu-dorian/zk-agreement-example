@@ -3,7 +3,16 @@ namespace org.accordproject.ransomware.recovery
 import org.accordproject.contract.* from https://models.accordproject.org/accordproject/contract.cto
 import org.accordproject.runtime.* from https://models.accordproject.org/accordproject/runtime.cto
 import org.accordproject.obligation.* from https://models.accordproject.org/accordproject/obligation.cto
-import org.accordproject.money.MonetaryAmount from https://models.accordproject.org/money@0.2.0.cto
+import org.accordproject.money.DigitalMonetaryAmount from https://models.accordproject.org/money@0.2.0.cto
+import org.accordproject.money.DigitalCurrencyCode from https://models.accordproject.org/money@0.2.0.cto
+
+/**
+ * Custom PaymentObligation for digital currency
+ */
+event DigitalPaymentObligation extends Obligation {
+  o DigitalMonetaryAmount amount
+  o String description
+}
 
 /**
  * The status of a ransomware contract
@@ -29,10 +38,11 @@ concept ContractParty {
 asset RansomwareContract extends Contract {
   o ContractParty buyer              // The victim who needs to pay
   o ContractParty seller            // The attacker who provides decryption
-  o MonetaryAmount paymentAmount    // Amount to be paid
+  o DigitalMonetaryAmount paymentAmount    // Amount to be paid in cryptocurrency
   o String fileCommitment           // Commitment to the decryption key
   o ContractStatus status           // Current state of the contract
-  o String submittedKey optional    // The key submitted for validation
+  o String masterKey optional       // The actual master key for decryption
+  o String submittedKey optional    // The hash of the submitted key
 }
 
 /**
