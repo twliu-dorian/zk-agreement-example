@@ -1,0 +1,6 @@
+{
+  "victimId": "1234",
+  "fileId": "22250b8012b87cc63792f3eb42eb2894c6b32970c34ffa2bd353b3db5345ce32",
+  "encryptedFile": "./files/secret.txt.encrypted",
+  "commitment": "abd1a0442f679fc574067ae6f2407d5f130802c48ff5f68f4d5886eb08447465"
+}

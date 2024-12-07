@@ -1,0 +1,3 @@
+get contract.json output after each command which is run. 
+fix the decrypt function - also it should require passing of the master key
+document everything.

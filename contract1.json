@@ -1,0 +1,30 @@
+{
+  "contract": {
+    "$class": "org.accordproject.ransomware.recovery.RansomwareContract",
+    "contractId": "bc9306fc86b20c9f1bc2258cd9dc0899",
+    "buyer": {
+      "$class": "org.accordproject.ransomware.recovery.ContractParty",
+      "partyId": "1234",
+      "name": "Victim 1234"
+    },
+    "seller": {
+      "$class": "org.accordproject.ransomware.recovery.ContractParty",
+      "partyId": "5678",
+      "name": "Attacker 5678"
+    },
+    "paymentAmount": {
+      "$class": "org.accordproject.money.DigitalMonetaryAmount",
+      "doubleValue": 1,
+      "digitalCurrencyCode": "ETH"
+    },
+    "fileCommitment": "abd1a0442f679fc574067ae6f2407d5f130802c48ff5f68f4d5886eb08447465",
+    "status": "AWAITING_EVALUATION",
+    "masterKey": "d41d98e5be6f4bbd639f6c7fd044918de82b5c81492062dfb5fd2ed0c2b07487",
+    "submittedKey": "abd1a0442f679fc574067ae6f2407d5f130802c48ff5f68f4d5886eb08447465"
+  },
+  "state": {
+    "$class": "org.accordproject.ransomware.recovery.RansomwareContractState",
+    "status": "AWAITING_EVALUATION",
+    "message": "Key submitted, awaiting validation"
+  }
+}

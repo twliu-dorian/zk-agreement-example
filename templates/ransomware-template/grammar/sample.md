@@ -1,0 +1,1 @@
+Upon verification of the decryption key against commitment "c5cb769909fb4aae0eec3b46574c14e0a0ef58adae5a3ea966ca81fda52aa214", "Victim 1234" shall pay to "Attacker 5678" the amount of 1.0 ETH.

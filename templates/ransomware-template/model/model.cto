@@ -1,0 +1,84 @@
+namespace org.accordproject.ransomware.recovery
+
+import org.accordproject.contract.* from https://models.accordproject.org/accordproject/contract.cto
+import org.accordproject.runtime.* from https://models.accordproject.org/accordproject/runtime.cto
+import org.accordproject.obligation.* from https://models.accordproject.org/accordproject/obligation.cto
+import org.accordproject.money.DigitalMonetaryAmount from https://models.accordproject.org/money@0.2.0.cto
+import org.accordproject.money.DigitalCurrencyCode from https://models.accordproject.org/money@0.2.0.cto
+
+/**
+ * Custom PaymentObligation for digital currency
+ */
+event DigitalPaymentObligation extends Obligation {
+  o DigitalMonetaryAmount amount
+  o String description
+}
+
+/**
+ * The status of a ransomware contract
+ */
+enum ContractStatus {
+  o INIT                  // Initial state when contract is created
+  o AWAITING_EVALUATION   // Key has been submitted, waiting for validation
+  o FINISH_EVALUATION     // Validation completed but failed
+  o COMPLETE             // Key validated successfully, payment obligation emitted
+}
+
+/**
+ * A party in the contract
+ */
+concept ContractParty {
+  o String partyId
+  o String name
+}
+
+/**
+ * The template model
+ */
+asset RansomwareContract extends Contract {
+  o ContractParty buyer              // The victim who needs to pay
+  o ContractParty seller            // The attacker who provides decryption
+  o DigitalMonetaryAmount paymentAmount    // Amount to be paid in cryptocurrency
+  o String fileCommitment           // Commitment to the decryption key
+  o ContractStatus status           // Current state of the contract
+  o String masterKey optional       // The actual master key for decryption
+  o String submittedKey optional    // The hash of the submitted key
+}
+
+/**
+ * Contract state
+ */
+asset RansomwareContractState extends State {
+  o ContractStatus status
+  o String message optional
+}
+
+/**
+ * A request to submit a key
+ */
+transaction KeySubmissionRequest extends Request {
+  o String key                      // The decryption key being submitted
+}
+
+/**
+ * A response from submitting a key
+ */
+transaction KeySubmissionResponse extends Response {
+  o Boolean success
+  o String message
+}
+
+/**
+ * A request to validate the submitted key
+ */
+transaction ValidationRequest extends Request {
+  o String submittedKey            // The key to validate
+}
+
+/**
+ * A response from validating the key
+ */
+transaction ValidationResponse extends Response {
+  o Boolean success
+  o String message
+}
